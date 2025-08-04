@@ -6,33 +6,32 @@
  * @returns {string|null} The URL of the hyperlink, or null if no hyperlink is found.
  */
 function getHyperlinkFromCell(sheetName, columnNumber, rowNumber) {
-  try {
-    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = spreadsheet.getSheetByName(sheetName);
+	try {
+		const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+		const sheet = spreadsheet.getSheetByName(sheetName);
 
-    if (!sheet) {
-      console.error(`Error: Sheet '${sheetName}' not found.`);
-      return null;
-    }
+		if (!sheet) {
+			console.error(`Error: Sheet '${sheetName}' not found.`);
+			return null;
+		}
 
-    const range = sheet.getRange(rowNumber, columnNumber);
-    const richTextValue = range.getRichTextValue();
+		const range = sheet.getRange(rowNumber, columnNumber);
+		const richTextValue = range.getRichTextValue();
 
-    if (richTextValue) {
-      // Get the URL from the first text segment (assuming the whole cell is one hyperlink)
-      const url = richTextValue.getLinkUrl();
-      if (url) {
-        return url;
-      }
-    }
+		if (richTextValue) {
+			// Get the URL from the first text segment (assuming the whole cell is one hyperlink)
+			const url = richTextValue.getLinkUrl();
+			if (url) {
+				return url;
+			}
+		}
 
-    console.log(`No hyperlink found in cell on sheet ${sheetName}.`);
-    return null;
-
-  } catch (e) {
-    console.error(`An error occurred: ${e.message}`);
-    return null;
-  }
+		console.log(`No hyperlink found in cell on sheet ${sheetName}.`);
+		return null;
+	} catch (e) {
+		console.error(`An error occurred: ${e.message}`);
+		return null;
+	}
 }
 
 /**
@@ -43,11 +42,11 @@ function getHyperlinkFromCell(sheetName, columnNumber, rowNumber) {
  * @returns {boolean} True if the URL is an internal sheet reference, false otherwise.
  */
 function isInternalSheetReference(url) {
-  if (!url || typeof url !== 'string') {
-    return false;
-  }
+	if (!url || typeof url !== "string") {
+		return false;
+	}
 
-  return url.startsWith('#gid=');
+	return url.startsWith("#gid=");
 }
 
 /**
@@ -57,19 +56,19 @@ function isInternalSheetReference(url) {
  * @returns {boolean} True if the URL is a Google Sheet reference, false otherwise.
  */
 function isGoogleSheetReference(url) {
-  if (!url || typeof url !== 'string') {
-    return false;
-  }
+	if (!url || typeof url !== "string") {
+		return false;
+	}
 
-  // Regular expression to match Google Sheets URLs (aka "https://docs.google.com/spreadsheets/d/)
-  const googleSheetRegex = /^https:\/\/docs\.google\.com\/spreadsheets\/d\//;
+	// Regular expression to match Google Sheets URLs (aka "https://docs.google.com/spreadsheets/d/)
+	const googleSheetRegex = /^https:\/\/docs\.google\.com\/spreadsheets\/d\//;
 
-  try {
-    return googleSheetRegex.test(url);
-  } catch (e) {
-    console.error(`Error checking Google Sheet reference: ${e.message}`);
-    return false;
-  }
+	try {
+		return googleSheetRegex.test(url);
+	} catch (e) {
+		console.error(`Error checking Google Sheet reference: ${e.message}`);
+		return false;
+	}
 }
 
 /**
@@ -79,20 +78,19 @@ function isGoogleSheetReference(url) {
  * @returns {boolean} True if the URL is a Google Doc reference, false otherwise.
  */
 function isGoogleDocReference(url) {
-  if (!url || typeof url !== 'string') {
-    return false;
-  }
+	if (!url || typeof url !== "string") {
+		return false;
+	}
 
-  const googleDocRegex = /^https:\/\/docs\.google\.com\/document\/d\//;
+	const googleDocRegex = /^https:\/\/docs\.google\.com\/document\/d\//;
 
-  try {
-    return googleDocRegex.test(url);
-  } catch (e) {
-    console.error(`Error checking Google Doc reference: ${e.message}`);
-    return false;
-  }
+	try {
+		return googleDocRegex.test(url);
+	} catch (e) {
+		console.error(`Error checking Google Doc reference: ${e.message}`);
+		return false;
+	}
 }
-
 
 /**
  * Retrieves a Sheet object based on its URL.
@@ -103,46 +101,55 @@ function isGoogleDocReference(url) {
  * @returns {GoogleAppsScript.Spreadsheet.Sheet|null} The Sheet object if found, otherwise null.
  */
 function getSheetFromUrl(sheetUrl) {
-  if (!isGoogleSheetReference(sheetUrl)) {
-    console.error(`Error: The provided URL '${sheetUrl}' is not a valid Google Sheet URL.`);
-    return null;
-  }
+	if (!isGoogleSheetReference(sheetUrl)) {
+		console.error(
+			`Error: The provided URL '${sheetUrl}' is not a valid Google Sheet URL.`
+		);
+		return null;
+	}
 
-  try {
-    // Extract spreadsheet ID from the URL
-    const spreadsheetIdMatch = sheetUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-    if (!spreadsheetIdMatch || spreadsheetIdMatch.length < 2) {
-      console.error(`Error: Could not extract spreadsheet ID from URL: ${sheetUrl}`);
-      return null;
-    }
-    const spreadsheetId = spreadsheetIdMatch[1];
+	try {
+		// Extract spreadsheet ID from the URL
+		const spreadsheetIdMatch = sheetUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+		if (!spreadsheetIdMatch || spreadsheetIdMatch.length < 2) {
+			console.error(
+				`Error: Could not extract spreadsheet ID from URL: ${sheetUrl}`
+			);
+			return null;
+		}
+		const spreadsheetId = spreadsheetIdMatch[1];
 
-    // Open the spreadsheet
-    const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
-    if (!spreadsheet) {
-      console.error(`Error: Could not open spreadsheet with ID: ${spreadsheetId}`);
-      return null;
-    }
+		// Open the spreadsheet
+		const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+		if (!spreadsheet) {
+			console.error(
+				`Error: Could not open spreadsheet with ID: ${spreadsheetId}`
+			);
+			return null;
+		}
 
-    // Extract GID (sheet ID) from the URL if present
-    const gidMatch = sheetUrl.match(/#gid=([0-9]+)/);
-    if (gidMatch && gidMatch.length >= 2) {
-      const gid = parseInt(gidMatch[1], 10);
-      const sheet = spreadsheet.getSheetById(gid);
-      if (!sheet) {
-        console.warn(`Warning: Sheet with GID '${gid}' not found in spreadsheet '${spreadsheet.getName()}'. Returning the first sheet.`);
-        return spreadsheet.getSheets()[0]; // Fallback to the first sheet
-      }
-      return sheet;
-    } else {
-      // If no GID is specified, return the first sheet in the spreadsheet
-      return spreadsheet.getSheets()[0];
-    }
-
-  } catch (e) {
-    console.error(`An error occurred while getting sheet from URL: ${e.message}`);
-    return null;
-  }
+		// Extract GID (sheet ID) from the URL if present
+		const gidMatch = sheetUrl.match(/#gid=([0-9]+)/);
+		if (gidMatch && gidMatch.length >= 2) {
+			const gid = parseInt(gidMatch[1], 10);
+			const sheet = spreadsheet.getSheetById(gid);
+			if (!sheet) {
+				console.warn(
+					`Warning: Sheet with GID '${gid}' not found in spreadsheet '${spreadsheet.getName()}'. Returning the first sheet.`
+				);
+				return spreadsheet.getSheets()[0]; // Fallback to the first sheet
+			}
+			return sheet;
+		} else {
+			// If no GID is specified, return the first sheet in the spreadsheet
+			return spreadsheet.getSheets()[0];
+		}
+	} catch (e) {
+		console.error(
+			`An error occurred while getting sheet from URL: ${e.message}`
+		);
+		return null;
+	}
 }
 
 /**
@@ -152,48 +159,61 @@ function getSheetFromUrl(sheetUrl) {
  * @returns {GoogleAppsScript.Spreadsheet.Spreadsheet|null} The Spreadsheet object if found, otherwise null.
  */
 function getSpreadsheetFromUrl(sheetUrl) {
-  if (!isGoogleSheetReference(sheetUrl)) {
-    console.error(`Error: The provided URL '${sheetUrl}' is not a valid Google Sheet URL.`);
-    return null;
-  }
+	if (!isGoogleSheetReference(sheetUrl)) {
+		console.error(
+			`Error: The provided URL '${sheetUrl}' is not a valid Google Sheet URL.`
+		);
+		return null;
+	}
 
-  try {
-    const spreadsheetIdMatch = sheetUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-    if (!spreadsheetIdMatch || spreadsheetIdMatch.length < 2) {
-      console.error(`Error: Could not extract spreadsheet ID from URL: ${sheetUrl}`);
-      return null;
-    }
+	try {
+		const spreadsheetIdMatch = sheetUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+		if (!spreadsheetIdMatch || spreadsheetIdMatch.length < 2) {
+			console.error(
+				`Error: Could not extract spreadsheet ID from URL: ${sheetUrl}`
+			);
+			return null;
+		}
 
-    const spreadsheetId = spreadsheetIdMatch[1];
-    const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+		const spreadsheetId = spreadsheetIdMatch[1];
+		const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
 
-    if (!spreadsheet) {
-      console.error(`Error: Could not open spreadsheet with ID: ${spreadsheetId}`);
-      return null;
-    }
+		if (!spreadsheet) {
+			console.error(
+				`Error: Could not open spreadsheet with ID: ${spreadsheetId}`
+			);
+			return null;
+		}
 
-    return spreadsheet;
-  } catch (e) {
-    console.error(`An error occurred while getting spreadsheet from URL: ${e.message}`);
-    return null;
-  }
+		return spreadsheet;
+	} catch (e) {
+		console.error(
+			`An error occurred while getting spreadsheet from URL: ${e.message}`
+		);
+		return null;
+	}
 }
 
-
+/**
+ * Retrieves a Sheet object based on its GiD.
+ *
+ * @param {string} gid The full gid of the Google Sheet.
+ * @returns {GoogleAppsScript.Spreadsheet.Spreadsheet|null} The Sheet object if found, otherwise null.
+ */
 function getSheetNameByGid(spreadsheet, gid) {
-  gid = Number(gid); // Ensure it's a number
-  var sheets = spreadsheet.getSheets();
-  for (var i = 0; i < sheets.length; i++) {
-    if (sheets[i].getSheetId() === gid) {
-      return sheets[i].getName(); // Return the sheet name
-    }
-  }
-  return null; // Not found
+	gid = Number(gid); // Ensure it's a number
+	var sheets = spreadsheet.getSheets();
+	for (var i = 0; i < sheets.length; i++) {
+		if (sheets[i].getSheetId() === gid) {
+			return sheets[i].getName(); // Return the sheet name
+		}
+	}
+	return null; // Not found
 }
 
 /**
  * Moves the value from one cell to another
- * 
+ *
  * @param {Sheet} exportSheet The sheet to take values from
  * @param {number} exportRow The row to take values from
  * @param {number} exportColumn The row to take values from
@@ -201,21 +221,31 @@ function getSheetNameByGid(spreadsheet, gid) {
  * @param {number} importRow The row to give values to
  * @param {number} importColumn The row to give values to
  */
-function migrateCell(exportSheet, exportColumn, exportRow,  importSheet,importColumn, importRow) {
-  if(!(exportSheet instanceof sheetContext) || !(importSheet instanceof sheetContext))
-    throw new Error("Must pass sheetContext objects to function");
-  var migrationValue = exportSheet.getRange(exportRow,exportColumn).getValue();
-  importSheet.getRange(importRow,importColumn).setValue(migrationValue);
+function migrateCell(
+	exportSheet,
+	exportColumn,
+	exportRow,
+	importSheet,
+	importColumn,
+	importRow
+) {
+	if (
+		!(exportSheet instanceof sheetContext) ||
+		!(importSheet instanceof sheetContext)
+	)
+		throw new Error("Must pass sheetContext objects to function");
+	var migrationValue = exportSheet.getRange(exportRow, exportColumn).getValue();
+	importSheet.getRange(importRow, importColumn).setValue(migrationValue);
 }
 
 /**
  * Returns the whole number value of a date, when passed a date value (in milliseconds)
- * 
+ *
  * @param {number} date A date given in milliseconds
- * @returns {number} day The whole number value of a day 
+ * @returns {number} day The whole number value of a day
  */
 function getDateAsNumber(date) {
-  return Math.trunc(date / (1000 * 60 * 60 * 24))
+	return Math.trunc(date / (1000 * 60 * 60 * 24));
 }
 
 /**
@@ -227,8 +257,10 @@ function getDateAsNumber(date) {
  * @returns {True|False}
  */
 function isDayOff(day) {
-  var workdayCheckboxChecked = dailyRoutine.sheet.getRange(dailyRoutine.workdayCheckbox).getValues()[0][0];
-  return isWeekend(day) || !workdayCheckboxChecked;
+	var workdayCheckboxChecked = dailyRoutine.sheet
+		.getRange(dailyRoutine.workdayCheckbox)
+		.getValues()[0][0];
+	return isWeekend(day) || !workdayCheckboxChecked;
 }
 
 /**
@@ -238,191 +270,198 @@ function isDayOff(day) {
  * @returns {True|False}
  */
 function isWeekend(day) {
-  return day == "Saturday" || day == "Sunday";
+	return day == "Saturday" || day == "Sunday";
 }
 
 /**
  * Returns a table from a supplied Google Doc url
- * 
+ *
  * @param {string} sheetUrl - The full url to the google sheet
  * @param {string} tableNumber
- * @param {string} 
+ * @param {string}
  * @returns {table}
  */
 function getGoogleDocTable(sheetUrl, tableNumber = 0, tabName = null) {
-  var doc = DocumentApp.openByUrl(sheetUrl);
+	var doc = DocumentApp.openByUrl(sheetUrl);
 
-  for (const tab of doc.getTabs()) {
-    if(tabName == null)
-      break;
+	for (const tab of doc.getTabs()) {
+		if (tabName == null) break;
 
-    const tabBody = tab.asDocumentTab().getBody();
-    const text = tabBody.getText();
-    if (text.includes(tabName)) {
-      doc = tab;
-      break;
-    }
-  }
+		const tabBody = tab.asDocumentTab().getBody();
+		const text = tabBody.getText();
+		if (text.includes(tabName)) {
+			doc = tab;
+			break;
+		}
+	}
 
-  const tables = doc.getBody().getTables();
+	const tables = doc.getBody().getTables();
 
-  if (tables.length === 0) {
-    Logger.log("No tables found in the document.");
-    return;
-  }
+	if (tables.length === 0) {
+		Logger.log("No tables found in the document.");
+		return;
+	}
 
-  return tables[tableNumber];
+	return tables[tableNumber];
 }
 
 /***
  * Blends two colors together
- * 
+ *
  * @param {string} hex1 - color as a hex
  * @param {string} hex3 - color as a hex
  */
 function blendHexColors(hex1, hex2) {
-  // Helper to convert hex to RGB
-  function hexToRgb(hex) {
-    const cleanHex = hex.replace("#", "");
-    return {
-      r: parseInt(cleanHex.substring(0, 2), 16),
-      g: parseInt(cleanHex.substring(2, 4), 16),
-      b: parseInt(cleanHex.substring(4, 6), 16)
-    };
-  }
+	// Helper to convert hex to RGB
+	function hexToRgb(hex) {
+		const cleanHex = hex.replace("#", "");
+		return {
+			r: parseInt(cleanHex.substring(0, 2), 16),
+			g: parseInt(cleanHex.substring(2, 4), 16),
+			b: parseInt(cleanHex.substring(4, 6), 16),
+		};
+	}
 
-  function rgbToHex(r, g, b) {
-    return "#" + [r, g, b].map(x => {
-      const hex = x.toString(16);
-      return hex.length === 1 ? "0" + hex : hex;
-    }).join("");
-  }
+	function rgbToHex(r, g, b) {
+		return (
+			"#" +
+			[r, g, b]
+				.map((x) => {
+					const hex = x.toString(16);
+					return hex.length === 1 ? "0" + hex : hex;
+				})
+				.join("")
+		);
+	}
 
-  const rgb1 = hexToRgb(hex1);
-  const rgb2 = hexToRgb(hex2);
+	const rgb1 = hexToRgb(hex1);
+	const rgb2 = hexToRgb(hex2);
 
-  const blended = {
-    r: Math.round((rgb1.r + rgb2.r) / 2),
-    g: Math.round((rgb1.g + rgb2.g) / 2),
-    b: Math.round((rgb1.b + rgb2.b) / 2)
-  };
+	const blended = {
+		r: Math.round((rgb1.r + rgb2.r) / 2),
+		g: Math.round((rgb1.g + rgb2.g) / 2),
+		b: Math.round((rgb1.b + rgb2.b) / 2),
+	};
 
-  return rgbToHex(blended.r, blended.g, blended.b);
+	return rgbToHex(blended.r, blended.g, blended.b);
 }
 
 function columnToLetter(column) {
-  let letter = '';
-  while (column > 0) {
-    const temp = (column - 1) % 26;
-    letter = String.fromCharCode(temp + 65) + letter;
-    column = Math.floor((column - temp - 1) / 26);
-  }
-  return letter;
+	let letter = "";
+	while (column > 0) {
+		const temp = (column - 1) % 26;
+		letter = String.fromCharCode(temp + 65) + letter;
+		column = Math.floor((column - temp - 1) / 26);
+	}
+	return letter;
 }
 
-/** THIS IS NOT FINISHED, THROWS WEIRD ERROR */
-function getNamedRangeHyperlinksForCell(sheetName, checkedCellLocation, namedRangeName) {
-  var sheet = projectSpreadsheet.getSheetByName(sheetName);
+function getNamedRangeHyperlinksForCell(
+	sheetName,
+	checkedCellLocation,
+	namedRangeName
+) {
+	var sheet = projectSpreadsheet.getSheetByName(sheetName);
 
-  // Get selections from cell
-  var range = sheet.getRange(checkedCellLocation);
-  var richText = getNamedRangeHyperLinks(range.getCell().getValue(), namedRangeName);
+	// Get selections from cell
+	var range = sheet.getRange(checkedCellLocation);
+	var richText = getNamedRangeHyperLinks(
+		range.getCell().getValue(),
+		namedRangeName
+	);
 
-  if(richText == undefined)
-    richText = emptyRichText;
+	if (richText == undefined) richText = emptyRichText;
 
-  range.setRichTextValue(richText);
+	range.setRichTextValue(richText);
 }
 
 function getNamedRangeHyperLinks(cellValue, namedRangeName) {
-  var richText;
-  
-  var cellSelections = cellValue.replaceAll(", ",",").split(",");
-  if(!cellSelections | cellSelections[0] == "")
-    return emptyRichText;
-  
-  // Get values from named range to compare against
-  var namedRange = projectSpreadsheet.getRangeByName(namedRangeName);
-  var namedRangeValues = namedRange.getValues().flat();
+	var richText;
 
-  // Cycle throught cellSelections 
-  for(let i = 0; i < cellSelections.length; i++) {
+	var cellSelections = cellValue.replaceAll(", ", ",").split(",");
+	if (!cellSelections | (cellSelections[0] == "")) return emptyRichText;
 
-    // Cycle through named range values
-    for (let j = 0; j < namedRange.getNumRows(); j++) {
-      var namedRangeValue = namedRangeValues[j];
+	// Get values from named range to compare against
+	var namedRange = projectSpreadsheet.getRangeByName(namedRangeName);
+	var namedRangeValues = namedRange.getValues().flat();
 
-      if (namedRangeValue == cellSelections[i]) {
-        // Get cell from named range
-        var rangeCell = namedRange.getCell(j + 1, 1);
-        richText = addRichTextURL(rangeCell,richText);
-      }
-    }
-  }
-  return richText;
+	// Cycle throught cellSelections
+	for (let i = 0; i < cellSelections.length; i++) {
+		// Cycle through named range values
+		for (let j = 0; j < namedRange.getNumRows(); j++) {
+			var namedRangeValue = namedRangeValues[j];
+
+			if (namedRangeValue == cellSelections[i]) {
+				// Get cell from named range
+				var rangeCell = namedRange.getCell(j + 1, 1);
+				richText = addRichTextURL(rangeCell, richText);
+			}
+		}
+	}
+	return richText;
 }
 
-function getNamedRangeURLs()
-{
-  // Get named ranges values to compare against
-  var namedRange = projectSpreadsheet.getRangeByName(namedRangeName);
-  var namedRangeValues = namedRange.getValues().flat();
+// function getNamedRangeURLs() {
+// 	// Get named ranges values to compare against
+// 	var namedRange = projectSpreadsheet.getRangeByName(namedRangeName);
+// 	var namedRangeValues = namedRange.getValues().flat();
 
-  // Cycle throught cellSelections 
-  for(let i = 0; i < cellSelections.length; i++) {
+// 	// Cycle throught cellSelections
+// 	for (let i = 0; i < cellSelections.length; i++) {
+// 		// Cycle through named range values
+// 		for (let j = 0; j < namedRange.getNumRows(); j++) {
+// 			var namedRangeValue = namedRangeValues[j];
 
-    // Cycle through named range values
-    for (let j = 0; j < namedRange.getNumRows(); j++) {
-      var namedRangeValue = namedRangeValues[j];
+// 			if (namedRangeValue == cellSelections[i]) {
+// 				// Get cell from named range
+// 				var rangeCell = namedRange.getCell(j + 1, 1);
+// 				richText = addRichTextURL(rangeCell, richText);
+// 			}
+// 		}
+// 	}
 
-      if (namedRangeValue == cellSelections[i]) {
-        // Get cell from named range
-        var rangeCell = namedRange.getCell(j + 1, 1);
-        richText = addRichTextURL(rangeCell,richText);
-      }
-    }
-  }
-
-  return richText;
-}
+// 	return richText;
+// }
 
 function addRichTextURL(cell, sourceRichTextValue) {
-  var newText = cell.getValue();
-  var linkUrl = cell.getRichTextValue().getLinkUrl();
-  var linkStart;
-  var linkText;
-  var newRichTextValue = SpreadsheetApp.newRichTextValue();
+	var newText = cell.getValue();
+	var linkUrl = cell.getRichTextValue().getLinkUrl();
+	var linkStart;
+	var linkText;
+	var newRichTextValue = SpreadsheetApp.newRichTextValue();
 
-  if(sourceRichTextValue == undefined) {
-    sourceRichTextValue = SpreadsheetApp.newRichTextValue();
-    linkText = newText;
-    linkStart = 0;
-    newRichTextValue.setText(linkText);
-  }
-  else {
-    var oldTextLength = sourceRichTextValue.getText().length;
-    linkText = sourceRichTextValue.getText() + ", " + newText;
-    linkStart = oldTextLength + 2;
-    newRichTextValue = copyRichTextValueHyperlinks(sourceRichTextValue,linkText);
-  }
+	if (sourceRichTextValue == undefined) {
+		sourceRichTextValue = SpreadsheetApp.newRichTextValue();
+		linkText = newText;
+		linkStart = 0;
+		newRichTextValue.setText(linkText);
+	} else {
+		var oldTextLength = sourceRichTextValue.getText().length;
+		linkText = sourceRichTextValue.getText() + ", " + newText;
+		linkStart = oldTextLength + 2;
+		newRichTextValue = copyRichTextValueHyperlinks(
+			sourceRichTextValue,
+			linkText
+		);
+	}
 
-  return newRichTextValue
-    .setLinkUrl(linkStart, linkText.length, linkUrl)
-    .build();
+	return newRichTextValue
+		.setLinkUrl(linkStart, linkText.length, linkUrl)
+		.build();
 }
 
 function copyRichTextValueHyperlinks(sourceRTV, linkText) {
-  var runs = sourceRTV.getRuns();
-  const builder = SpreadsheetApp.newRichTextValue().setText(linkText);
+	var runs = sourceRTV.getRuns();
+	const builder = SpreadsheetApp.newRichTextValue().setText(linkText);
 
-  runs.forEach(run => {
-    const url = run.getLinkUrl();
-    if (url) {
-      const start = run.getStartIndex();
-      const end = run.getEndIndex();
-      builder.setLinkUrl(start, end, url);
-    }
-  });
+	runs.forEach((run) => {
+		const url = run.getLinkUrl();
+		if (url) {
+			const start = run.getStartIndex();
+			const end = run.getEndIndex();
+			builder.setLinkUrl(start, end, url);
+		}
+	});
 
-  return builder;
+	return builder;
 }
