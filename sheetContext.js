@@ -1,6 +1,5 @@
 class sheetContext {
-	constructor(sheetName, titleRowNumber, spreadsheet) {
-		this.Spreadsheet = spreadsheet;
+	constructor(sheetName, titleRowNumber) {
 		this.SheetName = sheetName;
 		this.titleRow = titleRowNumber;
 

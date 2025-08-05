@@ -1,11 +1,3 @@
-var longTerm = new tasksContext('Long-Term', 1);
-
-function test() {
-  importFromUrl("https://docs.google.com/spreadsheets/d/1Bh-5bjyKYrhQRAiv39NhI1SDy09BB6SWt3-5FjrZqrI/edit?gid=1682281383#gid=1682281383");
-  debugger;
-}
-
-
 function importLongTerm() {
  var genres = longTerm.sheet.getRangeByName(genreNamedRangeName);
 

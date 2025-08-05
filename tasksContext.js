@@ -1,8 +1,8 @@
 var taskSheetNames = ["Tasks", "To-Do"];
 
 class tasksContext extends sheetContext {
-	constructor(sheetName, titleRow, spreadsheet) {
-		super(sheetName, titleRow, spreadsheet);
+	constructor(sheetName, titleRow) {
+		super(sheetName, titleRow);
 
 		// Add Default column names
 		this.nameColumnName = "Name";
