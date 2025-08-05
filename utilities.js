@@ -34,6 +34,11 @@ function getHyperlinkFromCell(sheetName, columnNumber, rowNumber) {
 	}
 }
 
+/** Generates a Task Id */
+function createTaskGuid() {
+	return Utilities.getUuid();
+}
+
 /**
  * Checks if a given URL is a reference to another sheet within the same document
  * An internal sheet reference typically contains the spreadsheet ID and a "#gid=" parameter.
@@ -346,6 +351,21 @@ function blendHexColors(hex1, hex2) {
 	return rgbToHex(blended.r, blended.g, blended.b);
 }
 
+/**
+ * Validates that the provided Range object refers to exactly one cell.
+ * Throws an error if the range spans more than one row or column.
+ *
+ * @param {Range} range - The Range object to validate.
+ * @throws {Error} If the range is not a single cell.
+ */
+function assertSingleCell(range) {
+	if (range.getNumRows() !== 1 || range.getNumColumns() !== 1) {
+		throw new Error(
+			`Expected a single cell, but got a range of ${range.getNumRows()} rows and ${range.getNumColumns()} columns.`
+		);
+	}
+}
+
 function columnToLetter(column) {
 	let letter = "";
 	while (column > 0) {
@@ -400,28 +420,6 @@ function getNamedRangeHyperLinks(cellValue, namedRangeName) {
 	}
 	return richText;
 }
-
-// function getNamedRangeURLs() {
-// 	// Get named ranges values to compare against
-// 	var namedRange = projectSpreadsheet.getRangeByName(namedRangeName);
-// 	var namedRangeValues = namedRange.getValues().flat();
-
-// 	// Cycle throught cellSelections
-// 	for (let i = 0; i < cellSelections.length; i++) {
-// 		// Cycle through named range values
-// 		for (let j = 0; j < namedRange.getNumRows(); j++) {
-// 			var namedRangeValue = namedRangeValues[j];
-
-// 			if (namedRangeValue == cellSelections[i]) {
-// 				// Get cell from named range
-// 				var rangeCell = namedRange.getCell(j + 1, 1);
-// 				richText = addRichTextURL(rangeCell, richText);
-// 			}
-// 		}
-// 	}
-
-// 	return richText;
-// }
 
 function addRichTextURL(cell, sourceRichTextValue) {
 	var newText = cell.getValue();

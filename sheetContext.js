@@ -1,181 +1,169 @@
 class sheetContext {
-  constructor(sheetName, titleRowNumber, spreadsheet) {
-    this.Spreadsheet = spreadsheet;
-    this.SheetName = sheetName;
-    this.titleRow = titleRowNumber;
+	constructor(sheetName, titleRowNumber, spreadsheet) {
+		this.Spreadsheet = spreadsheet;
+		this.SheetName = sheetName;
+		this.titleRow = titleRowNumber;
 
-    if(this.Spreadsheet != null)
-      return;
+		if (this.Spreadsheet != null) return;
 
-    if (projectSpreadsheet == null)
-      projectSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+		if (projectSpreadsheet == null)
+			projectSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
 
-    this.Spreadsheet = projectSpreadsheet;
-    return;
-  }
+		this.Spreadsheet = projectSpreadsheet;
+		return;
+	}
 
-  /**
-   * Returns the GoogleAppsScript.Spreadsheet.Sheet object that this sheetContext represents
-   * if none is present, it will retrieve, set, and return the propertys
-   *
-   * @returns {GoogleAppsScript.Spreadsheet.Sheet|null} The Sheet object if found, otherwise null
-   */
-  getSheet() {
-    if(this.Sheet != null)
-      return this.Sheet;
+	/**
+	 * Returns the GoogleAppsScript.Spreadsheet.Sheet object that this sheetContext represents
+	 * if none is present, it will retrieve, set, and return the property
+	 *
+	 * @returns {GoogleAppsScript.Spreadsheet.Sheet|null} The Sheet object if found, otherwise null
+	 */
+	getSheet() {
+		if (this.Sheet != null) return this.Sheet;
 
-    this.Sheet = this.Spreadsheet.getSheetByName(this.SheetName);
-    return this.Sheet;
-  }
+		this.Sheet = this.Spreadsheet.getSheetByName(this.SheetName);
+		return this.Sheet;
+	}
 
-  get sheet() {
-    return this.getSheet();
-  }
+	get sheet() {
+		return this.getSheet();
+	}
 
-  /**
-   * Returns the last row property 
-   * if none is present, it will retrieve, set, and return the property
-   *
-   * @returns {number|null} The last row if found, otherwise null
-   */
-  getLastRow() {
-    if(this.LRow != null)
-      return this.LRow;
-      
-    if (this.Sheet == null)
-      this.getSheet();
-      
-    this.LRow = this.Sheet.getLastRow();
-    return this.LRow;
-  }
+	/**
+	 * Returns the last row property
+	 * if none is present, it will retrieve, set, and return the property
+	 *
+	 * @returns {number|null} The last row if found, otherwise null
+	 */
+	getLastRow() {
+		if (this.LRow != null) return this.LRow;
 
-  get lastRow() {
-    return this.getLastRow();
-  }
+		if (this.Sheet == null) this.getSheet();
 
-  /**
-   * Returns the last column property 
-   * if none is present, it will retrieve, set, and return the property
-   *
-   * @returns {number|null} The last column if found, otherwise null
-   */
-  getLastColumn() {
-    if(this.LColumn != null)
-      return this.LColumn;
+		this.LRow = this.Sheet.getLastRow();
+		return this.LRow;
+	}
 
-    if (this.Sheet == null)
-      this.getSheet();
-      
-    this.LColumn = this.sheet.getLastColumn();
-    return this.LColumn;
-  }
+	get lastRow() {
+		return this.getLastRow();
+	}
 
-  get lastColumn() {
-    return this.getLastColumn();
-  }
+	/**
+	 * Returns the last column property
+	 * if none is present, it will retrieve, set, and return the property
+	 *
+	 * @returns {number|null} The last column if found, otherwise null
+	 */
+	getLastColumn() {
+		if (this.LColumn != null) return this.LColumn;
 
-  /***
-  * Returns a column number based on a title passed to the function
-  *
-  * @params {string} The title of a column
-  * @returns {number} The number the column with that title
-  */
-  getColumnNumber(columnTitle) {
-    var columnNumberProperty = columnTitle + "ColumnNumber";
-    if(this[columnNumberProperty] != null)
-      return this[columnNumberProperty];
+		if (this.Sheet == null) this.getSheet();
 
-    var titles = this.sheet.getRange(this.titleRow, 1, 1, this.lastColumn).getValues();
+		this.LColumn = this.sheet.getLastColumn();
+		return this.LColumn;
+	}
 
-    for (let i = 0; i < titles[0].length; i++) {
-      if (titles[0][i] === columnTitle) {
-        this[columnNumberProperty] = ++i;
-        return this[columnNumberProperty];
-      }
-    }
+	get lastColumn() {
+		return this.getLastColumn();
+	}
 
-    return null;
-  }
+	/**
+	 * Returns a column number based on a title passed to the function
+	 *
+	 * @param {string} columnTitle The title of a column
+	 * @returns {number} The number the column with that title
+	 */
+	getColumnNumber(columnTitle) {
+		var columnNumberProperty = columnTitle + "ColumnNumber";
+		if (this[columnNumberProperty] != null) return this[columnNumberProperty];
 
-  /***
-  * Returns a column number based on a title passed to the function
-  *
-  * @params {string} The title of a column
-  * @returns {number} The number the column with that title
-  */
-  getRowNumber(column, cellValue) {
-    if(typeof column == "string")
-      column = this.getColumnNumber(column);
+		var titles = this.sheet
+			.getRange(this.titleRow, 1, 1, this.lastColumn)
+			.getValues();
 
-    var rowValues = this.sheet.getRange(1, column, this.lastRow, 1).getValues();
+		for (let i = 0; i < titles[0].length; i++) {
+			if (titles[0][i] === columnTitle) {
+				this[columnNumberProperty] = ++i;
+				return this[columnNumberProperty];
+			}
+		}
 
-    for (let i = this.titleRow; i < rowValues.length; i++) {
-      if (rowValues[i][0] == cellValue) {
-        return i + 1;
-      }
-    }
+		return null;
+	}
 
-    return null;
-  }
+	/**
+	 * Returns a row number based on a value passed to the function
+	 *
+	 * @params {string/number} column The title OR number of a column
+	 * @param {string}
+	 * @returns {number} The number the column with that title
+	 */
+	getRowNumber(column, cellValue) {
+		if (typeof column == "string") column = this.getColumnNumber(column);
 
-  /***
-  * Hides or Unhides all rows in a table
-  * 
-  * if the checkbox is CHECKED the row is SHOWN
-  * if UNCHECK the row is HIDDEN
-  */
-  showHideRows(checkboxColumnName) {
-    var checkboxColumnNumber = this.getColumnNumber(checkboxColumnName);
-    
-    for (var i = this.titleRow + 1; i <= this.lastRow; i++) {
-      var checkboxCell = this.sheet.getRange(i,checkboxColumnNumber);
+		var rowValues = this.sheet.getRange(1, column, this.lastRow, 1).getValues();
 
-      // Check if the checkbox is checked
-      if (checkboxCell.isChecked()) 
-        this.sheet.showRows(i);
-      else
-        this.sheet.hideRows(i);
-    }
-  }
+		for (let i = this.titleRow; i < rowValues.length; i++) {
+			if (rowValues[i][0] == cellValue) {
+				return i + 1;
+			}
+		}
 
-  /***
-  * Hides or Unhides all columns in a table
-  *
-  * if the checkbox is CHECKED the column is SHOWN
-  * if UNCHECK the column is HIDDEN
-  */
-  showHideColumns(checkboxRow) {
-    if(typeof column == "string")
-      checkboxRow = this.getRowNumber(1, checkboxRowName);
-    
-    for (var i = 1; i <= this.lastColumn; i++) {
-      var checkboxCell = this.sheet.getRange(checkboxRow, i);
+		return null;
+	}
 
-      // Check if the checkbox is checked
-      if (checkboxCell.isChecked()) 
-        this.sheet.hideColumns(i);
-      else
-        this.sheet.showColumns(i);
-    }
-  }
+	/***
+	 * Hides or Unhides all rows in a table
+	 *
+	 * if the checkbox is CHECKED the row is SHOWN
+	 * if UNCHECK the row is HIDDEN
+	 */
+	showHideRows(checkboxColumnName) {
+		var checkboxColumnNumber = this.getColumnNumber(checkboxColumnName);
 
-  // Gets a value from a cell
-  getValue(column,rowNumber) {
-    if(typeof column == "string")
-      column = this.getColumnNumber(column);
-    
-    if(column == null || rowNumber == null)
-      return null;
-      
-    var range = this.sheet.getRange(rowNumber,column).getValue();
-    return range;
-  }
+		for (var i = this.titleRow + 1; i <= this.lastRow; i++) {
+			var checkboxCell = this.sheet.getRange(i, checkboxColumnNumber);
 
-  // Sets a cell value
-  setValue(column,rowNumber,value) {
-    if(typeof column == "string")
-      column = this.getColumnNumber(column);
-      
-    this.sheet.getRange(rowNumber,column).setValue(value);
-  }
+			// Check if the checkbox is checked
+			if (checkboxCell.isChecked()) this.sheet.showRows(i);
+			else this.sheet.hideRows(i);
+		}
+	}
+
+	/***
+	 * Hides or Unhides all columns in a table
+	 *
+	 * if the checkbox is CHECKED the column is SHOWN
+	 * if UNCHECK the column is HIDDEN
+	 */
+	showHideColumns(checkboxRow) {
+		if (typeof column == "string")
+			checkboxRow = this.getRowNumber(1, checkboxRowName);
+
+		for (var i = 1; i <= this.lastColumn; i++) {
+			var checkboxCell = this.sheet.getRange(checkboxRow, i);
+
+			// Check if the checkbox is checked
+			if (checkboxCell.isChecked()) this.sheet.hideColumns(i);
+			else this.sheet.showColumns(i);
+		}
+	}
+
+	// Gets a value from a cell
+	getValue(column, rowNumber) {
+		if (typeof column == "string") column = this.getColumnNumber(column);
+
+		if (column == null || rowNumber == null) return null;
+
+		var range = this.sheet.getRange(rowNumber, column).getValue();
+		return range;
+	}
+
+	// Sets a cell value
+	setValue(column, rowNumber, value) {
+		if (typeof column == "string") column = this.getColumnNumber(column);
+
+		this.sheet.getRange(rowNumber, column).setValue(value);
+	}
 }
