@@ -32,6 +32,6 @@ function midnightRun() {
 }
 
 function test() {
-	var cell = projectSpreadsheet.getSheetByName("Long-Term").getRange("B2");
-	setCellHyperlinksFromNamedRange(cell, "ProjectGenres");
+  var copyLongTerm = new tasksContext("Copy of Tasks", 2);
+  copyLongTerm.setProjectGenreHyperlinks();
 }

@@ -22,6 +22,28 @@ class tasksContext extends sheetContext {
 		this.nearDateBackgroundColor2 = "#274e13";
 	}
 
+  getNameColumnNumber() {
+		if (this.NameColumnNumber != null) return this.NameColumnNumber;
+
+		this.NameColumnNumber = this.getColumnNumber(this.nameColumnName);
+		return this.NameColumnNumber;
+	}
+
+	get nameColumnNumber() {
+		return this.getNameColumnNumber();
+	}
+
+  getGenreColumnNumber() {
+		if (this.GenreColumnNumber != null) return this.GenreColumnNumber;
+
+		this.GenreColumnNumber = this.getColumnNumber(this.genreColumnName);
+		return this.GenreColumnNumber;
+	}
+
+	get genreColumnNumber() {
+		return this.getGenreColumnNumber();
+	}
+
 	importSpreadsheet(spreadsheet) {
 		if (Object.prototype.toString.call(spreadsheet) === "[object Spreadsheet]")
 			throw new Error(
@@ -204,4 +226,12 @@ class tasksContext extends sheetContext {
 			}
 		}
 	}
+
+  setGenreHyperlinks() {
+    var cell;
+    for(let i = this.titleRow + 1; i <= this.lastRow; i++) {
+      cell = this.sheet.getRange(i, this.genreColumnNumber);
+      setCellHyperlinksFromNamedRange(cell, "ProjectGenres");
+    }
+  }
 }
