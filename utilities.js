@@ -35,7 +35,7 @@ function getHyperlinkFromCell(sheetName, columnNumber, rowNumber) {
 }
 
 /** Generates a Task Id */
-function createTaskGuid() {
+function createGuid() {
 	return Utilities.getUuid();
 }
 

@@ -1,6 +1,6 @@
 var projectSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
 var toDoBoard = new tasksContext("Tasks", 2);
-var longTerm = new tasksContext('Long-Term', 1);
+var longTerm = new tasksContext("Long-Term", 1);
 
 var genreNamedRangeName = "ProjectGenres";
 var warningDateDaysAhead = 7;
@@ -25,6 +25,6 @@ function midnightRun() {
 }
 
 function test() {
-  var cell = projectSpreadsheet.getRange('B2');
-  setCellHyperlinksFromNamedRange(cell, "ProjectGenres");
+	var cell = projectSpreadsheet.getRange("B2");
+	setCellHyperlinksFromNamedRange(cell, "ProjectGenres");
 }
