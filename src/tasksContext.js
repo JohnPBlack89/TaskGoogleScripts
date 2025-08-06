@@ -1,48 +1,31 @@
 var taskSheetNames = ["Tasks", "To-Do"];
+var columns = ["name", "project", "genre", "due", "done", "notes"]
 
 class tasksContext extends sheetContext {
 	constructor(sheetName, titleRow) {
 		super(sheetName, titleRow);
 
-		// Add Default column names
-		this.nameColumnName = "Name";
-		this.projectColumnName = "Project";
-		this.genreColumnName = "Genre";
-		this.dueDateColumnName = "Due";
-		this.notesColumnName = "Notes";
-		this.isFinishedColumnName = "Done";
-		this.checkboxColumnName = null;
-
-		// DueDateColors
-		this.pastDateBackgroundColor1 = "#990000";
-		this.pastDateBackgroundColor2 = "#660000";
-		this.todayBackgroundColor1 = "#bf9000";
-		this.todayBackgroundColor2 = "#7f6000";
-		this.nearDateBackgroundColor1 = "#38761d";
-		this.nearDateBackgroundColor2 = "#274e13";
+		columns.forEach(base => {
+      this.createLazyColumn(base);
+    });
 	}
 
-  getNameColumnNumber() {
-		if (this.NameColumnNumber != null) return this.NameColumnNumber;
+  createLazyColumn(baseName) {
+    const getterName = `${baseName}ColumnNumber`;
+    const cacheKey = `${baseName}CacheKey`;
+    const columnName = `${baseName}ColumnName`;
 
-		this.NameColumnNumber = this.getColumnNumber(this.nameColumnName);
-		return this.NameColumnNumber;
-	}
+    Object.defineProperty(this, getterName, {
+      get: function () {
+        if (this[cacheKey] != null) return this[cacheKey];
 
-	get nameColumnNumber() {
-		return this.getNameColumnNumber();
-	}
-
-  getGenreColumnNumber() {
-		if (this.GenreColumnNumber != null) return this.GenreColumnNumber;
-
-		this.GenreColumnNumber = this.getColumnNumber(this.genreColumnName);
-		return this.GenreColumnNumber;
-	}
-
-	get genreColumnNumber() {
-		return this.getGenreColumnNumber();
-	}
+        this[cacheKey] = this.getColumnNumber(this[columnName]);
+        return this[cacheKey];
+      },
+      configurable: true,
+      enumerable: true,
+    });
+  }
 
 	importSpreadsheet(spreadsheet) {
 		if (Object.prototype.toString.call(spreadsheet) === "[object Spreadsheet]")
@@ -230,6 +213,7 @@ class tasksContext extends sheetContext {
   setGenreHyperlinks() {
     var cell;
     for(let i = this.titleRow + 1; i <= this.lastRow; i++) {
+      var gcn = this.genreColumnNumber();
       cell = this.sheet.getRange(i, this.genreColumnNumber);
       setCellHyperlinksFromNamedRange(cell, "ProjectGenres");
     }
