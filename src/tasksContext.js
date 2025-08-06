@@ -11,20 +11,43 @@ class tasksContext extends sheetContext {
 	}
 
   createLazyColumn(baseName) {
-    const getterName = `${baseName}ColumnNumber`;
+    const numberGetterName = `${baseName}ColumnNumber`;
     const cacheKey = `${baseName}CacheKey`;
     const columnName = `${baseName}ColumnName`;
+    const sortFunctionName = `${baseName}Sort`;
+    const hyperlinkFunctionName = `${baseName}SetHyperlinks`
 
-    Object.defineProperty(this, getterName, {
+    Object.defineProperty(this, numberGetterName, {
       get: function () {
         if (this[cacheKey] != null) return this[cacheKey];
 
-        this[cacheKey] = this.getColumnNumber(this[columnName]);
+        this[cacheKey] = this.getColumnNumber(columnName);
         return this[cacheKey];
       },
       configurable: true,
       enumerable: true,
     });
+
+    Object.defineProperty(this, sortFunctionName , { function() {
+		  var tasksTable = this.sheet.getRange(
+        this.titleRow + 1,
+        1,
+        this.lastRow - this.titleRow + 1,
+        this.lastColumn
+      );
+		    tasksTable.sort(numberGetterName);
+	    }, configurable: true, enumerable: true,
+    })
+
+    Object.defineProperty(this, hyperlinkFunctionName , { function() {
+      var cell;
+      for(let i = this.titleRow + 1; i <= this.lastRow; i++) {
+        var gcn = this.genreColumnNumber();
+        cell = this.sheet.getRange(i, this.genreColumnNumber);
+        setCellHyperlinksFromNamedRange(cell, "ProjectGenres");
+      }
+      }, configurable: true, enumerable: true,
+    })
   }
 
 	importSpreadsheet(spreadsheet) {
@@ -136,33 +159,6 @@ class tasksContext extends sheetContext {
 	}
 
 	/***
-	 * Organizes THIS task sheet by its due date column
-	 */
-	sortTasks() {
-		var tasksTable = this.sheet.getRange(
-			this.titleRow + 1,
-			1,
-			this.lastRow - this.titleRow + 1,
-			this.lastColumn
-		);
-		var dueDateColumn = this.getColumnNumber(this.dueDateColumnName);
-		tasksTable.sort(dueDateColumn);
-	}
-
-	getGenreNamedRangeHyperLinks() {
-		var totalRows = this.lastRow - this.titleRow;
-		var genreColumnNumber = this.getColumnNumber(this.genreColumnName);
-		for (var i = 1; i < totalRows; i++) {
-			getNamedRangeHyperlinksForCell(
-				this.Sheet.getName(),
-				i,
-				genreColumnNumber,
-				genreNamedRangeName
-			);
-		}
-	}
-
-	/***
 	 * Highlights the due date column cells
 	 * Based on TODAY'S DATE AND this.nearDateDaysAhead
 	 */
@@ -209,13 +205,4 @@ class tasksContext extends sheetContext {
 			}
 		}
 	}
-
-  setGenreHyperlinks() {
-    var cell;
-    for(let i = this.titleRow + 1; i <= this.lastRow; i++) {
-      var gcn = this.genreColumnNumber();
-      cell = this.sheet.getRange(i, this.genreColumnNumber);
-      setCellHyperlinksFromNamedRange(cell, "ProjectGenres");
-    }
-  }
 }
