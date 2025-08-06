@@ -1,0 +1,26 @@
+{
+	"name": "taskorganizer",
+	"version": "1.0.0",
+	"description": "A task organizer",
+	"main": "main.js",
+	"type": "module",
+	"scripts": {
+		"build": "node --require ./polyfill.cjs build.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/JohnPBlack89/TaskGoogleScripts.git"
+	},
+	"author": "Johnny Black",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/JohnPBlack89/TaskGoogleScripts/issues"
+	},
+	"homepage": "https://github.com/JohnPBlack89/TaskGoogleScripts#readme",
+	"devDependencies": {
+		"@dtrlanz/gas-bundler": "^0.3.3"
+	},
+	"dependencies": {
+		"@web-std/file": "^3.0.3"
+	}
+}

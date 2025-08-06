@@ -28,3 +28,10 @@ function test() {
 	var cell = projectSpreadsheet.getRange("B2");
 	setCellHyperlinksFromNamedRange(cell, "ProjectGenres");
 }
+(function (global) {
+	global.test = test;
+	global.organizeTasks = organizeTasks;
+	global.onEditTask = onEditTask;
+	global.onEditToDoBoard = onEditToDoBoard;
+	global.midnightRun = midnightRun;
+})(typeof globalThis !== "undefined" ? globalThis : this);

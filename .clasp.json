@@ -1,17 +1,9 @@
 {
 	"scriptId": "1RegSHKldxaFN6uylQM0Fv5t_gRPd9n8NqT2r0LJCrWV5QdAiCFBIJdxP",
-	"rootDir": "./",
+	"rootDir": "dist",
 	"scriptExtensions": [".js", ".gs"],
 	"htmlExtensions": [".html"],
 	"jsonExtensions": [".json"],
-	"filePushOrder": [
-		"sheetContext.js",
-		"taskContext.js",
-		"utilities.js",
-		"namedRangeHyperLinks.js",
-		"longTerm.js",
-		"holidayPrep.js",
-		"main.js"
-	],
+	"filePushOrder": [],
 	"skipSubdirectories": false
 }
