@@ -1,3 +1,9 @@
+import "./sheetContext.js";
+import "./tasksContext.js";
+import "./utilities.js";
+import "./namedRangeHyperlinks.js";
+import "./longTerm.js";
+import "./holidayPrep.js";
 var projectSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
 var toDoBoard = new tasksContext("Tasks", 2);
 var longTerm = new tasksContext("Long-Term", 1);
@@ -28,9 +34,3 @@ function test() {
 	var cell = projectSpreadsheet.getRange("B2");
 	setCellHyperlinksFromNamedRange(cell, "ProjectGenres");
 }
-
-globalThis.test = test;
-globalThis.organizeTasks = organizeTasks;
-globalThis.onEditTask = onEditTask;
-globalThis.onEditToDoBoard = onEditToDoBoard;
-globalThis.midnightRun = midnightRun;
