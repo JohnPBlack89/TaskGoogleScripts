@@ -1,4 +1,3 @@
-// build.js
 import { build } from "@dtrlanz/gas-bundler";
 
 await build({
