@@ -8,9 +8,9 @@ function setCellHyperlinksFromNamedRange(cell, namedRangeName) {
 	assertSingleCell(cell);
 
 	// Gets the RichText
-	var richText = getNamedRangeRichText(cell.getValue(), namedRangeName);
+	var richText = getNamedRangeRichText(cell, namedRangeName);
 
-	dropdownCell.setRichTextValue(richText);
+	cell.setRichTextValue(richText);
 }
 
 /**
@@ -24,12 +24,13 @@ function setCellHyperlinksFromNamedRange(cell, namedRangeName) {
 function getNamedRangeRichText(cell, namedRangeName) {
 	assertSingleCell(cell);
 	var richText;
+  var cellValue =  cell.getValue();
 
-	var cellSelections = cell.getValue(1, 1).replaceAll(", ", ",").split(",");
+	var cellSelections =cellValue.replaceAll(", ", ",").split(",");
 	if (!cellSelections | (cellSelections[0] == "")) return emptyRichText;
 
 	// Get values from named range to compare against
-	var namedRange = ss.getRangeByName(namedRangeName);
+	var namedRange = projectSpreadsheet.getRangeByName(namedRangeName);
 	var namedRangeValues = namedRange.getValues().flat();
 
 	// Cycle throught cellSelections
