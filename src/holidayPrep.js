@@ -1,4 +1,4 @@
-var holidayPrep = new tasksContext("Holiday Prep", 1);
+var holidayPrep = new ToDoList("Holiday Prep", 1);
 holidayPrep.checkboxColumn = "Imported";
 holidayPrep.nameColumnName = "Task";
 holidayPrep.projectColumnName = "Occasion";

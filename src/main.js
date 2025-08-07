@@ -1,44 +1,28 @@
-// import "./sheetContext.js";
-// import "./tasksContext.js";
-// import "./utilities.js";
-// import "./namedRangeHyperlinks.js";
-// import "./longTerm.js";
-// import "./holidayPrep.js";
-
 var projectSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-var toDoBoard = new tasksContext("Tasks", 2);
-var longTerm = new tasksContext("Long-Term", 1);
-
-// DueDateColors
-var pastDateBackgroundColor1 = "#990000";
-var pastDateBackgroundColor2 = "#660000";
-var todayBackgroundColor1 = "#bf9000";
-var todayBackgroundColor2 = "#7f6000";
-var nearDateBackgroundColor1 = "#38761d";
-var nearDateBackgroundColor2 = "#274e13";
+var toDoBoard = new ToDoList("Tasks", 2);
+var longTerm = new ToDoList("Long-Term", 1);
 
 var warningDateDaysAhead = 7;
 var daysToImportTask = 45;
 
 var emptyRichText = SpreadsheetApp.newRichTextValue().setText("").build();
 
-function organizeTasks() {
-	toDoBoard.sortTasks();
-	toDoBoard.highlightDates();
+function onEdit() {
+	if (projectSpreadsheet.getActiveSheet().getName() == toDoBoard.sheet.getName())
+		toDoBoard.organize();
+  
+  if (projectSpreadsheet.getActiveSheet().getName() == longTerm.sheet.getName())
+		longTerm.genreSetHyperlinks();
 }
-
-function onEditToDoBoard() {
-	if (projectSpreadsheet.getActiveSheet().getName() == projectTasks.SheetName)
-		organizeTasks();
-}
-
-function onEditTask() {}
 
 function midnightRun() {
-	organizeTasks();
+	toDoBoard.organize()
 }
 
-function test() {
-  var copyLongTerm = new tasksContext("Copy of Tasks", 2);
-  copyLongTerm.setGenreHyperlinks();
-}
+/***
+ * To Do
+ * - Modify Column Initialization to include custom sheets with custom columns (aka long-term)
+ * - GUID
+ * - Export/Import
+ * - NDW
+ */

@@ -1,13 +1,21 @@
 var taskSheetNames = ["Tasks", "To-Do"];
-var columns = ["name", "project", "genre", "due", "done", "notes"]
+var columns = ["name", "project", "genre", "due", "done", "notes", "id", "updated"]
 
-class tasksContext extends sheetContext {
+class ToDoList extends sheetContext {
 	constructor(sheetName, titleRow) {
 		super(sheetName, titleRow);
 
 		columns.forEach(base => {
       this.createLazyColumnProperty(base);
     });
+
+    this.pastDateBackgroundColor1 = "#990000";
+    this.pastDateBackgroundColor2 = "#660000";
+    this.todayBackgroundColor1 = "#bf9000";
+    this.todayBackgroundColor2 = "#7f6000";
+    this.nearDateBackgroundColor1 = "#38761d";
+    this.nearDateBackgroundColor2 = "#274e13";
+    this.finishedBackgroundColor = "#434343";
 	}
 
   createLazyColumnProperty(baseName) {
@@ -15,7 +23,8 @@ class tasksContext extends sheetContext {
     const cacheKey = `${baseName}CacheKey`;
     const columnName = `${baseName.charAt(0).toUpperCase() + baseName.slice(1)}`;
     const sortFunctionName = `${baseName}Sort`;
-    const hyperlinkFunctionName = `${baseName}SetHyperlinks`
+    const hyperlinkFunctionName = `${baseName}SetHyperlinks`;
+    const namedRangeName = `Project${columnName}s`
 
     Object.defineProperty(this, numberGetterName, {
       get: function () {
@@ -28,8 +37,8 @@ class tasksContext extends sheetContext {
       enumerable: true,
     });
 
-    Object.defineProperty(this, sortFunctionName , { function() {
-		    this.tasksTable.sort(numberGetterName);
+    Object.defineProperty(this, sortFunctionName , { value: function() {
+		    this.tasksTable.sort(this[numberGetterName]);
 	    }, configurable: true, enumerable: true,
     })
 
@@ -38,7 +47,7 @@ class tasksContext extends sheetContext {
       for(let i = this.titleRow + 1; i <= this.lastRow; i++) {
         var gcn = this.genreColumnNumber;
         cell = this.sheet.getRange(i, this.genreColumnNumber);
-        setCellHyperlinksFromNamedRange(cell, "ProjectGenres");
+        setCellHyperlinksFromNamedRange(cell, namedRangeName);
       }
       }, configurable: true, enumerable: true,
     })
@@ -169,20 +178,24 @@ class tasksContext extends sheetContext {
 		);
 	}
 
+  organize() {
+    this.dueSort();
+	  this.highlightDates();
+  }
+
 	/***
 	 * Highlights the due date column cells
 	 * Based on TODAY'S DATE AND this.nearDateDaysAhead
 	 */
 	highlightDates() {
-		var dueDateColumn = this.getColumnNumber(this.dueDateColumnName);
 		var totalRows = this.lastRow - this.titleRow;
-		var range = this.sheet.getRange(
+		var dueDateColumnRange = this.sheet.getRange(
 			this.titleRow + 1,
-			dueDateColumn,
+			this.dueColumnNumber,
 			totalRows,
 			1
 		);
-		var values = range.getValues();
+		var values = dueDateColumnRange.getValues();
 		var today = new Date();
 		var todayDate = getDateAsNumber(today);
 
@@ -193,21 +206,22 @@ class tasksContext extends sheetContext {
 				this.sheet
 					.getRange(i + 1 + this.titleRow, 1, 1, this.lastColumn)
 					.setBackground("#434343");
+        /************* This is where to put the move row function to move finished tasks to the finished Tasks sheet */
 				continue;
 			}
 
-			var diffDays = cellDate - todayDate;
-			var cell = range.getCell(i + 1, 1);
+			var daysAhead = cellDate - todayDate;
+			var cell = dueDateColumnRange.getCell(i + 1, 1);
 
 			var addition = (i % 2) + 1;
 
-			if (diffDays < 0) {
+			if (daysAhead < 0) {
 				cell.setBackground(
 					this["pastDateBackgroundColor" + addition.toString()]
 				); // Red for past dates
-			} else if (diffDays === 0) {
+			} else if (daysAhead === 0) {
 				cell.setBackground(this["todayBackgroundColor" + addition.toString()]); // Yellow for today
-			} else if (diffDays <= nearDateDaysAhead) {
+			} else if (daysAhead <= warningDateDaysAhead) {
 				cell.setBackground(
 					this["nearDateBackgroundColor" + addition.toString()]
 				); // Green for dates within a week
