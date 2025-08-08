@@ -34,6 +34,12 @@ function importLongTerm() {
   } */
 }
 
+function test() {
+  var taskToDo = new ToDoList("Copy of Tasks", projectSpreadsheet, 2);
+  const trSpreadsheet = SpreadsheetApp.openById("1KItq6qKszyOR0MUW0LqSVZ4yuDyf7XDHYBPZCtuAaEk");
+  taskToDo.importSpreadsheet(trSpreadsheet);
+}
+
 /***
  * To Do
  * - GUID

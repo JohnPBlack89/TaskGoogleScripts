@@ -25,6 +25,9 @@ class SheetContext {
 	getSheet() {
 		if (this.Sheet != null) return this.Sheet;
 
+    if(this.Spreadsheet == null)
+      throw new Error("No Spreadsheet found");
+
 		this.Sheet = this.Spreadsheet.getSheetByName(this.SheetName);
 		return this.Sheet;
 	}
@@ -71,10 +74,6 @@ class SheetContext {
 		return this.getLastColumn();
 	}
 
-  /**
-   * 
-   */
-
 	/**
 	 * Returns a column number based on a title passed to the function
 	 *
@@ -97,6 +96,15 @@ class SheetContext {
 
 		return null;
 	}
+
+  /**
+   * Return values for the column
+   */
+  getColumnValues(columnTitle){
+    return this.sheet
+			.getRange(this.titleRow + 1, this.getColumnNumber(columnTitle), this.lastRow - this.titleRow, 1)
+			.getValues();
+  }
 
 	/**
 	 * Returns a row number based on a value passed to the function

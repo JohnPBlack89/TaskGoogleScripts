@@ -21,17 +21,30 @@ class ToDoList extends SheetContext {
   createColumnProperty(columnName) {
     const baseName = `${columnName.charAt(0).toLowerCase() + columnName.slice(1)}`;
     const numberGetterName = `${baseName}ColumnNumber`;
-    const cacheKey = `${baseName}CacheKey`;
+    const numberCacheKey = `${baseName}NumberCacheKey`;
     const sortFunctionName = `${baseName}Sort`;
     const hyperlinkFunctionName = `${baseName}SetHyperlinks`;
-    const namedRangeName = `Project${columnName}s`
+    const namedRangeName = `Project${columnName}s`;
+    const valueRangeGetterName = `${baseName}Values`;
+    const valueRangeCacheKey = `${baseName}ValuesCacheKey`
 
     Object.defineProperty(this, numberGetterName, {
       get: function () {
-        if (this[cacheKey] != null) return this[cacheKey];
+        if (this[numberCacheKey] != null) return this[numberCacheKey];
 
-        this[cacheKey] = this.getColumnNumber(columnName);
-        return this[cacheKey];
+        this[numberCacheKey] = this.getColumnNumber(columnName);
+        return this[numberCacheKey];
+      },
+      configurable: true,
+      enumerable: true,
+    });
+
+    Object.defineProperty(this, valueRangeGetterName, {
+      get: function () {
+        if (this[valueRangeCacheKey] != null) return this[valueRangeCacheKey];
+
+        this[valueRangeCacheKey] = this.getColumnValues(columnName);
+        return this[valueRangeCacheKey];
       },
       configurable: true,
       enumerable: true,
@@ -137,7 +150,7 @@ class ToDoList extends SheetContext {
     if(isInternalSheetReference(url)) {
       var gid = url.slice(5)
       var name = getSheetNameByGid(this.Spreadsheet,gid);
-      this.importSheet(name);
+      this.importToDoList(new ToDoList(name, this.Spreadsheet))
     }
 
     if(isGoogleSheetReference(url)) {
@@ -164,80 +177,69 @@ class ToDoList extends SheetContext {
 
 		if (taskSheetName == null) return;
 		
-    this.importSheet(new ToDoList(taskSheetName[0], 1, spreadsheet));
+    this.importToDoList(new ToDoList(taskSheetName[0], spreadsheet));
 	}
 
-	importSheet(sheet) {
-		if (typeof sheet == "string") sheet = new ToDoList(sheet, 1);
+	importToDoList(toDoList, columnMap = {}) {
+		if (typeof ToDoList == "string") toDoList = new ToDoList(toDoList, 1);
 
-		if (!(sheet instanceof ToDoList))
+		if (!(toDoList instanceof ToDoList))
 			throw new Error(
-				"Must pass either a string or ToDoList object to function importSheet(sheet)"
+				"Must pass either a string or ToDoList object to function importSheet(toDoList)"
 			);
 		
-    for (var i = sheet.titleRow + 1; i < sheet.lastRow; i++)
-				sheet.importRow(sheet, i);
+    for (var i = toDoList.titleRow + 1; i <= toDoList.lastRow; i++)
+				this.importToDoListRow(toDoList, i, columnMap);
 	}
 
-	importGoogleDoc(url) {
+	importToDoListRow(importToDoList, importListRowNumber, columnMap = {}) {
+    // Ensure a ToDoList was passed
+		if (!(importToDoList instanceof ToDoList))
+			throw new Error(
+				"Must pass a ToDoList object to function importToDoListRow(importToDoList, importListRowNumber, columnMap = {})" 
+			);
+
+    var thisRowNumber;
+
+    // Check if sheet has already imported a task with the same guid
+    var importRowId = importToDoList.idValues.flat()[importListRowNumber - 1];
+    if(importRowId == null || importRowId == "") {
+        importRowId = createGuid();
+        importToDoList.setValue(importToDoList.idColumnNumber,importListRowNumber,importRowId);
+        thisRowNumber = this.lastRow + 1;
+    } else if(this.idValues.flat().includes(importRowId)) {
+      thisRowNumber = this.idValues.flat().indexOf(importRowId);
+    } else {
+      thisRowNumber = this.lastRow + 1;
+    }
+
+    // Then check if the imported date is the same 
+    var thisUpdatedDate = this.getValue(this.updatedColumnNumber,thisRowNumber);
+    var importUpdatedDate = importToDoList.getValue(importToDoList.updatedColumnNumber,importListRowNumber);
+    if(thisUpdatedDate != "" && thisUpdatedDate == importUpdatedDate) return;
+    
+    // Check if due date is within import date;
+    var dueDate = importToDoList.getValue(importToDoList.dueDateColumnName, i);
+    if (
+      dueDate - new Date() > daysToImportTask
+    ) return;
+
+    // Create and fill row4432
+    var row = [];
+
+    for(var i = 1; i <= this.lastColumn; i++) {
+      if(columnMap.hasOwnProperty(this.headerMap(i))) {
+        debugger;
+      }
+      debugger;
+      row.push();
+    }
+
+    this.sheet.getRange(thisRowNumber,1,row.length(),1).setValues(row);
+	}
+
+  importGoogleDoc(url) {
     console.log("import Google Doc not implemented yet");
 		// var table = getGoogleDocTable(url, tableNumberInTab, tableTabName);
-	}
-
-	importRow(sheet, externalSheetRowNumber) {
-		if (!(sheet instanceof SheetContext))
-			throw new Error(
-				"Must pass a SheetContext object to function importRow(sheet)"
-			);
-    
-    var dueDate = sheet.getValue(sheet.dueDateColumnName, i);
-    var today = new Date();
-    var checkboxField = sheet.checkboxColumnName;
-    if (
-      checkboxField != false &&
-      dueDate - today > sheet.projectPrepDaysNeeded
-    )
-
-		var internalRowNumber = this.lastRow + 1;
-
-		// Migrate Task Name
-		this.importColumn(
-			sheet,
-			externalSheetRowNumber,
-			internalRowNumber,
-			this.nameColumnName
-		);
-		this.importColumn(
-			sheet,
-			externalSheetRowNumber,
-			internalRowNumber,
-			this.dueDateColumnName
-		);
-		this.importColumn(
-			sheet,
-			externalSheetRowNumber,
-			internalRowNumber,
-			this.projectColumnName
-		);
-		this.importColumn(
-			sheet,
-			externalSheetRowNumber,
-			internalRowNumber,
-			this.genreColumnName
-		);
-		this.importColumn(
-			sheet,
-			externalSheetRowNumber,
-			internalRowNumber,
-			this.notesColumnName
-		);
-
-		// Mark column as imported
-		if (this.checkboxColumnName == null) return;
-
-		var checkboxColumnNumber = this.getColumnNumber(this.checkboxColumnName);
-		this.sheet
-			.getRange(externalSheetRowNumber, checkboxColumnNumber)
-			.setValue(true);
 	}
 }
