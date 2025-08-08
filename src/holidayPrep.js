@@ -32,6 +32,8 @@ function updateHolidayPrep() {
 }
 
 function migrateHolidayPrepToTasks() {
+  updateHolidayPrep();
+  
 	var importMonthColumn = holidayPrep.getColumnNumber(
 		holidayPrep.importMonthColumnName
 	);

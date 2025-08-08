@@ -1,15 +1,8 @@
 class SheetContext {
-	constructor(sheetName, titleRowNumber) {
+	constructor(sheetName, spreadsheet = SpreadsheetApp.getActiveSpreadsheet(), titleRowNumber = 1) {
 		this.SheetName = sheetName;
 		this.titleRow = titleRowNumber;
-
-		if (this.Spreadsheet != null) return;
-
-		if (projectSpreadsheet == null)
-			projectSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-
-		this.Spreadsheet = projectSpreadsheet;
-		return;
+		this.Spreadsheet = spreadsheet;
 	}
 
   getHeaderMap() {
