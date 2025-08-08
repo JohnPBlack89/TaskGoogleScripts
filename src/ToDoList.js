@@ -1,13 +1,11 @@
 var taskSheetNames = ["Tasks", "To-Do"];
-var columns = ["name", "project", "genre", "due", "done", "notes", "id", "updated"]
 
 class ToDoList extends sheetContext {
 	constructor(sheetName, titleRow) {
 		super(sheetName, titleRow);
 
-		columns.forEach(base => {
-      this.createLazyColumnProperty(base);
-    });
+		for(var header in this.headerMap)
+      this.createColumnProperty(header);
 
     this.pastDateBackgroundColor1 = "#990000";
     this.pastDateBackgroundColor2 = "#660000";
@@ -18,10 +16,10 @@ class ToDoList extends sheetContext {
     this.finishedBackgroundColor = "#434343";
 	}
 
-  createLazyColumnProperty(baseName) {
+  createColumnProperty(columnName) {
+    const baseName = `${columnName.charAt(0).toLowerCase() + columnName.slice(1)}`;
     const numberGetterName = `${baseName}ColumnNumber`;
     const cacheKey = `${baseName}CacheKey`;
-    const columnName = `${baseName.charAt(0).toUpperCase() + baseName.slice(1)}`;
     const sortFunctionName = `${baseName}Sort`;
     const hyperlinkFunctionName = `${baseName}SetHyperlinks`;
     const namedRangeName = `Project${columnName}s`
@@ -68,6 +66,26 @@ class ToDoList extends sheetContext {
 
   get tasksTable() {
     return this.getTasksTable();
+  }
+
+  importFromUrl(url) {
+    if(url == null)
+          return;
+
+    // Check if cell is a link to another sheet
+    if(isInternalSheetReference(url)) {
+      var gid = url.slice(5)
+      var name = getSheetNameByGid(longTerm.Spreadsheet,gid);
+      longTerm.importSheet(name);
+    }
+
+    if(isGoogleSheetReference(url)) {
+      var importedSpreadsheet = getSpreadsheetFromUrl(url);
+      longTerm.importSpreadsheet(importedSpreadsheet  )
+    }
+
+    if(isGoogleDocReference(url))
+    longTerm.importGoogleDoc(url);
   }
 
 	importSpreadsheet(spreadsheet) {
@@ -179,6 +197,9 @@ class ToDoList extends sheetContext {
 	}
 
   organize() {
+    if(this.headerMap["Due"] == undefined)
+      return;
+
     this.dueSort();
 	  this.highlightDates();
   }
@@ -217,14 +238,12 @@ class ToDoList extends sheetContext {
 
 			if (daysAhead < 0) {
 				cell.setBackground(
-					this["pastDateBackgroundColor" + addition.toString()]
-				); // Red for past dates
+					this["pastDateBackgroundColor" + addition.toString()]);
 			} else if (daysAhead === 0) {
-				cell.setBackground(this["todayBackgroundColor" + addition.toString()]); // Yellow for today
+				cell.setBackground(this["todayBackgroundColor" + addition.toString()]);
 			} else if (daysAhead <= warningDateDaysAhead) {
 				cell.setBackground(
-					this["nearDateBackgroundColor" + addition.toString()]
-				); // Green for dates within a week
+					this["nearDateBackgroundColor" + addition.toString()]);
 			} else {
 				cell.setBackground(null); // Clear for future dates
 			}

@@ -55,6 +55,28 @@ function isInternalSheetReference(url) {
 }
 
 /**
+ *
+ * @param {Sheet} sheet
+ * @returns
+ */
+function getHeaderMap(sheet, titleRow, lastColumn) {
+	if (
+		sheet == null ||
+		sheet.getLastColumn() == 0 ||
+		sheet.getRange(titleRow, 1, 1, lastColumn) == undefined
+	)
+		return {};
+
+	var headers = sheet.getRange(titleRow, 1, 1, lastColumn).getValues()[0];
+	var headerMap = {};
+	headers.forEach((header, index) => {
+		headerMap[header] = index + 1; // Column numbers start at 1
+	});
+
+	return headerMap;
+}
+
+/**
  * Checks if a given URL is a reference to any Google Sheet document
  *
  * @param {string} url The URL to check.
@@ -235,10 +257,10 @@ function migrateCell(
 	importRow
 ) {
 	if (
-		!(exportSheet instanceof sheetContext) ||
-		!(importSheet instanceof sheetContext)
+		!(exportSheet instanceof SheetContext) ||
+		!(importSheet instanceof SheetContext)
 	)
-		throw new Error("Must pass sheetContext objects to function");
+		throw new Error("Must pass SheetContext objects to function");
 	var migrationValue = exportSheet.getRange(exportRow, exportColumn).getValue();
 	importSheet.getRange(importRow, importColumn).setValue(migrationValue);
 }

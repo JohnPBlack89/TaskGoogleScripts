@@ -1,6 +1,6 @@
 var projectSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-var toDoBoard = new ToDoList("Tasks", 2);
 var longTerm = new ToDoList("Long-Term", 1);
+var toDoBoard = new ToDoList("Tasks", 2);
 
 var warningDateDaysAhead = 7;
 var daysToImportTask = 45;
@@ -16,12 +16,22 @@ function onEdit() {
 }
 
 function midnightRun() {
+  var toDoBoard = new ToDoList("Tasks", 2);
 	toDoBoard.organize()
+}
+
+function importLongTerm() {
+ var genres = longTerm.sheet.getRangeByName(genreNamedRangeName);
+
+  for (var i = 1; i <= numRows; i++) {
+    var cell = genres.getCell(i, j);
+    var hyperlinkUrl = getHyperlinkFromCell(longTerm.SheetName, cell.getRow(), cell.getColumn());
+    importFromUrl(hyperlinkUrl);
+  }
 }
 
 /***
  * To Do
- * - Modify Column Initialization to include custom sheets with custom columns (aka long-term)
  * - GUID
  * - Export/Import
  * - NDW

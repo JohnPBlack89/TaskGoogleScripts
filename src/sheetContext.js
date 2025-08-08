@@ -1,4 +1,4 @@
-class sheetContext {
+class SheetContext {
 	constructor(sheetName, titleRowNumber) {
 		this.SheetName = sheetName;
 		this.titleRow = titleRowNumber;
@@ -12,8 +12,19 @@ class sheetContext {
 		return;
 	}
 
+  getHeaderMap() {
+    if (this.headerCache != null) return this.headerCache;
+
+    this.headerCache = getHeaderMap(this.sheet, this.titleRow, this.lastColumn);
+    return this.headerCache;
+  }
+
+  get headerMap() {
+    return this.getHeaderMap();
+  }
+
 	/**
-	 * Returns the GoogleAppsScript.Spreadsheet.Sheet object that this sheetContext represents
+	 * Returns the GoogleAppsScript.Spreadsheet.Sheet object that this SheetContext represents
 	 * if none is present, it will retrieve, set, and return the property
 	 *
 	 * @returns {GoogleAppsScript.Spreadsheet.Sheet|null} The Sheet object if found, otherwise null
@@ -67,6 +78,10 @@ class sheetContext {
 		return this.getLastColumn();
 	}
 
+  /**
+   * 
+   */
+
 	/**
 	 * Returns a column number based on a title passed to the function
 	 *
@@ -74,8 +89,7 @@ class sheetContext {
 	 * @returns {number} The number the column with that title
 	 */
 	getColumnNumber(columnTitle) {
-		var columnNumberProperty = columnTitle + "ColumnNumber";
-		if (this[columnNumberProperty] != null) return this[columnNumberProperty];
+		if (this.headerCache[columnTitle] != null) return this.headerCache[columnTitle];
 
 		var titles = this.sheet
 			.getRange(this.titleRow, 1, 1, this.lastColumn)
@@ -83,8 +97,8 @@ class sheetContext {
 
 		for (let i = 0; i < titles[0].length; i++) {
 			if (titles[0][i] === columnTitle) {
-				this[columnNumberProperty] = ++i;
-				return this[columnNumberProperty];
+				this.headerCache[columnTitle] = ++i;
+				return this.headerCache[columnTitle]
 			}
 		}
 
