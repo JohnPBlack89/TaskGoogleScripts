@@ -397,3 +397,7 @@ function columnToLetter(column) {
 	}
 	return letter;
 }
+
+function getHeaderKeyByValue(headerMap, targetValue) {
+  return Object.keys(headerMap).find(key => headerMap[key] === targetValue);
+}

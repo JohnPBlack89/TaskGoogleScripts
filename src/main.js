@@ -18,20 +18,11 @@ function onEdit() {
 }
 
 function midnightRun() {
-  var toDoBoard = new ToDoList("Tasks", 2);
+  importLongTerm();
 	toDoBoard.organize()
 }
 
 function importLongTerm() {
-  // Import from Long Term Projects list
-
-  // Import from Project Genres Task Boards
-  /* var genres = longTerm.sheet.getRangeByName(genreNamedRangeName);
-  for (var i = 1; i <= genres.length(); i++) {
-    var cell = genres.getCell(i, j);
-    var hyperlinkUrl = getHyperlinkFromCell(longTerm.SheetName, cell.getRow(), cell.getColumn());
-    toDoBoard.importFromUrl(hyperlinkUrl);
-  } */
 }
 
 function test() {
@@ -42,8 +33,10 @@ function test() {
 
 /***
  * To Do
- * - GUID
- * - Export/Import
+ * - Automatically update Updated Time
+ * - Push the most recent to the least recent in importRows()
+ * - Fix Magic Number in importRows()
+ * - Import Google Doc
  * - NDW
  * - Holiday Prep
  */
