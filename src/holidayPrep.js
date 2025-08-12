@@ -1,11 +1,11 @@
-var holidayPrep = new ToDoList("Holiday Prep", projectSpreadsheet, 1);
+/* var holidayPrep = new ToDoList("Holiday Prep", projectSpreadsheet, 1);
 holidayPrep.checkboxColumn = "Imported";
 holidayPrep.nameColumnName = "Task";
 holidayPrep.projectColumnName = "Occasion";
 holidayPrep.dueDateColumnName = "Due Date";
 holidayPrep.importMonthColumnName = "Import Month";
 holidayPrep.annualResetRowTaskName = "Annual Reset";
-
+*/
 function updateHolidayPrep() {
 	// Get today's date in month format
 	var today = new Date();

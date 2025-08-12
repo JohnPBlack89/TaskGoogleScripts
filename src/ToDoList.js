@@ -1,11 +1,8 @@
 var taskSheetNames = ["Tasks", "To-Do"];
 
-class ToDoList extends SheetContext {
+class ToDoList extends TableContext {
 	constructor(sheetName, spreadsheet, titleRow) {
 		super(sheetName, spreadsheet, titleRow);
-
-		for(var header in this.headerMap)
-      this.createColumnProperty(header);
 
     this.pastDateBackgroundColor1 = "#990000";
     this.pastDateBackgroundColor2 = "#660000";
@@ -14,84 +11,23 @@ class ToDoList extends SheetContext {
     this.nearDateBackgroundColor1 = "#38761d";
     this.nearDateBackgroundColor2 = "#274e13";
     this.finishedBackgroundColor = "#434343";
+    this.ndwBackgroundColor1 = "#990000";
+    this.ndwBackgroundColor2 = "#660000";
 	}
 
-  /** Creates a number getter, sort function, and a function to add all hyperlinks for a passed column
-   */
-  createColumnProperty(columnName) {
-    const baseName = `${columnName.charAt(0).toLowerCase() + columnName.slice(1)}`;
-    const numberGetterName = `${baseName}ColumnNumber`;
-    const numberCacheKey = `${baseName}NumberCacheKey`;
-    const sortFunctionName = `${baseName}Sort`;
-    const hyperlinkFunctionName = `${baseName}SetHyperlinks`;
-    const namedRangeName = `Project${columnName}s`;
-    const valueRangeGetterName = `${baseName}Values`;
-    const valueRangeCacheKey = `${baseName}ValuesCacheKey`
-
-    Object.defineProperty(this, numberGetterName, {
-      get: function () {
-        if (this[numberCacheKey] != null) return this[numberCacheKey];
-
-        this[numberCacheKey] = this.getColumnNumber(columnName);
-        return this[numberCacheKey];
-      },
-      configurable: true,
-      enumerable: true,
-    });
-
-    Object.defineProperty(this, valueRangeGetterName, {
-      get: function () {
-        if (this[valueRangeCacheKey] != null) return this[valueRangeCacheKey];
-
-        this[valueRangeCacheKey] = this.getColumnValues(columnName);
-        return this[valueRangeCacheKey];
-      },
-      configurable: true,
-      enumerable: true,
-    });
-
-    Object.defineProperty(this, sortFunctionName , { value: function() {
-		    this.tasksTable.sort(this[numberGetterName]);
-	    }, configurable: true, enumerable: true,
-    })
-
-    Object.defineProperty(this, hyperlinkFunctionName , { value: function() {
-      var cell;
-      for(let i = this.titleRow + 1; i <= this.lastRow; i++) {
-        var gcn = this.genreColumnNumber;
-        cell = this.sheet.getRange(i, this.genreColumnNumber);
-        setCellHyperlinksFromNamedRange(cell, namedRangeName);
-      }
-      }, configurable: true, enumerable: true,
-    })
-  }
-
-  getTasksTable() {
-    if (this.tasksTableCache != null) return this.tasksTableCache;
-
-    this.tasksTableCache = this.sheet.getRange(
-        this.titleRow + 1,
-        1,
-        this.lastRow - this.titleRow + 1,
-        this.lastColumn
-    );
-
-    return this.tasksTableCache;
-  }
-
-  get tasksTable() {
-    return this.getTasksTable();
-  }
 
   /** Organizes this list by its Due column
    */
-  organize() {
+  organize(e) {
     if(this.headerMap["Due"] == undefined) {
       console.log(`Unable to organize ${this.sheet.getName()} as it doesn't have a "Due" column`)
       return;
     }
 
+    // this.sheet.getRange(this.titleRow, 1, this.lastRow - 1, this.lastColumn).setBackground(null);
+    this.updatedRow(e);
     this.dueSort();
+    this.highlightNDW();
 	  this.highlightDates();
   }
 
@@ -100,19 +36,11 @@ class ToDoList extends SheetContext {
 	 */
 	highlightDates() {
 		var totalRows = this.lastRow - this.titleRow;
-		var dueDateColumnRange = this.sheet.getRange(
-			this.titleRow + 1,
-			this.dueColumnNumber,
-			totalRows,
-			1
-		);
-		var values = dueDateColumnRange.getValues();
 		var today = new Date();
 		var todayDate = getDateAsNumber(today);
 
 		for (var i = 0; i < totalRows; i++) {
-			var t = values[i][0];
-			var cellDate = getDateAsNumber(values[i][0]);
+			var cellDate = getDateAsNumber(this.dueValues[i][0]);
 			if (cellDate == null || cellDate == 0) {
 				this.sheet
 					.getRange(i + 1 + this.titleRow, 1, 1, this.lastColumn)
@@ -122,7 +50,7 @@ class ToDoList extends SheetContext {
 			}
 
 			var daysAhead = cellDate - todayDate;
-			var cell = dueDateColumnRange.getCell(i + 1, 1);
+			var cell = this.sheetRange.getCell(i + 1, this.dueColumnNumber);
 
 			var addition = (i % 2) + 1;
 
@@ -134,11 +62,32 @@ class ToDoList extends SheetContext {
 			} else if (daysAhead <= warningDateDaysAhead) {
 				cell.setBackground(
 					this["nearDateBackgroundColor" + addition.toString()]);
-			} else {
-				cell.setBackground(null); // Clear for future dates
 			}
 		}
 	}
+
+  /**
+   * Highlight NDW Rows
+   */
+  highlightNDW() {
+		for (var i = 0; i < this.lastRow - this.titleRow; i++) {
+      var row = this.sheet.getRange(i + this.titleRow + 1,1,1, this.lastColumn);
+			if (!this.nDWValues[i][0]) {
+        row.setBackground(null);
+        continue;
+      }
+
+			var addition = (i % 2) + 1;
+      row.setBackground(this["ndwBackgroundColor" + addition.toString()]);
+		}
+  }
+
+  /**
+   * Update last edited time
+   */
+  updatedRow(e) {
+    this.sheet.getRange(e.range.getRow(),this.updatedColumnNumber).setValue(new Date());
+  }
 
 
   /*** Imports ***/
@@ -202,13 +151,13 @@ class ToDoList extends SheetContext {
     var thisRowNumber;
 
     // Check if sheet has already imported a task with the same guid
-    var importRowId = importToDoList.idValues[importListRowNumber - 2][0];
+    var importRowId = importToDoList.idValues[importListRowNumber - 2][0]; // Where does -2 come from?????
     if(importRowId == null || importRowId == "") {
         importRowId = createGuid();
         importToDoList.setValue(importToDoList.idColumnNumber,importListRowNumber,importRowId);
         thisRowNumber = this.lastRow + 1;
     } else if(this.idValues.flat().includes(importRowId)) {
-      thisRowNumber = this.idValues.flat().indexOf(importRowId) + 3;
+      thisRowNumber = this.idValues.flat().indexOf(importRowId) + 3; // Where does +3 come from?????
     } else {
       thisRowNumber = this.lastRow + 1;
     }

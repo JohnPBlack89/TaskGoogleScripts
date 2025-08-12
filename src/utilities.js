@@ -5,7 +5,7 @@
  * @param {string} cellReference The A1 notation of the cell (e.g., "A1", "B5").
  * @returns {string|null} The URL of the hyperlink, or null if no hyperlink is found.
  */
-function getHyperlinkFromCell(sheetName, columnNumber, rowNumber) {
+function getURLHyperlinkFromCell(sheetName, columnNumber, rowNumber) {
 	try {
 		const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
 		const sheet = spreadsheet.getSheetByName(sheetName);
@@ -54,11 +54,7 @@ function isInternalSheetReference(url) {
 	return url.startsWith("#gid=");
 }
 
-/**
- *
- * @param {Sheet} sheet
- * @returns
- */
+
 function getHeaderMap(sheet, titleRow, lastColumn) {
 	if (
 		sheet == null ||
@@ -273,21 +269,6 @@ function migrateCell(
  */
 function getDateAsNumber(date) {
 	return Math.trunc(date / (1000 * 60 * 60 * 24));
-}
-
-/**
- * Returns T/F whether a given string is the name of a weekend OR today is a day off
- * based on whether or not the workday checkbox is checked (in Daily Routine)
- * (not checked means it IS a day off)
- *
- * @param {string} day The name of a day
- * @returns {True|False}
- */
-function isDayOff(day) {
-	var workdayCheckboxChecked = dailyRoutine.sheet
-		.getRange(dailyRoutine.workdayCheckbox)
-		.getValues()[0][0];
-	return isWeekend(day) || !workdayCheckboxChecked;
 }
 
 /**
